@@ -385,13 +385,13 @@ var vm = new Vue({
             for (let[k,v] of map) {
                 obj[k] = v;
             }
-            let jsonp = JSON.stringify(obj);
+            let jsonp = JSON.stringify(obj);  //JSON.stringify 方法，可将js对象转变为json格式数据
             $.ajax({
                 type:'POST', // 规定请求的类型（GET 或 POST）
                 url:'/case/backMessage', // 请求的url地址
                 dataType:'text', //预期的服务器响应的数据类型
                 data:{   //规定要发送到服务器的数据
-                    'jsonp':jsonp
+                    'jsonp':jsonp   //前端请求后台时携带的参数
                 },
                 success: function(result){ // 当请求成功时运行的函数
                     //result返回的是string类型的数组

@@ -94,13 +94,15 @@ layui.use(['jquery','layer','form','layedit'],
                layer.msg("请输入正确的手机号");
                return;
            }
+           //jquery的ajax请求方法
             $.ajax({
                 url:path+"/case/addCase",
-                data:JSON.stringify(data.field),
+                data:JSON.stringify(data.field),  //JSON.stringify（）  前端的Json转换方法，
+                                                // 将js对象data.field转换为Json格式的数据
                 dataType:'json',
                 type:'post',
                 contentType: "application/json",
-                success:function (data) {
+                success:function (data) {   //ajax方法请求后台方法后，执行这个方法里的逻辑
 
                     if (data.status == 200){
                         layer.msg("添加成功");

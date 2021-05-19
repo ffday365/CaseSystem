@@ -99,17 +99,20 @@ public class CaseController {
     @RequestMapping("addCase")
     @ResponseBody
     public ResultGson addCase(@RequestBody  String json, HttpSession session, HttpServletRequest request){
+        //解析json字符串
         Map<String, Object> mapJson = JSON.parseObject(json);
-        User user =(User)session.getAttribute("us");
+        //User user =(User)session.getAttribute("us");
        try{
-           caseService.addCase(mapJson,user);
+           //caseService.addCase(mapJson,user);
        }catch (Exception e){
-           Log log =Log.ok(user.getUsername(), IpAdress.getIp(request),1,"添加案件","失败", "添加案件\""+ mapJson.get("name")+"\"",user.getBusId());
-           logService.addLog(log);
+           //Log log =Log.ok(user.getUsername(), IpAdress.getIp(request),1,"添加案件","失败", "添加案件\""+ mapJson.get("name")+"\"",user.getBusId());
+           //logService.addLog(log);
            return ResultGson.error("执行出错");
        }
-        Log log =Log.ok(user.getUsername(), IpAdress.getIp(request),1,"添加案件","成功", "添加案件\""+ mapJson.get("name")+"\"",user.getBusId());
-        logService.addLog(log);
+       // Log log =Log.ok(user.getUsername(), IpAdress.getIp(request),1,"添加案件","成功", "添加案件\""+ mapJson.get("name")+"\"",user.getBusId());
+        //logService.addLog(log);
+
+        //ResultGson 是自己封装的类，ok方法是返回json格式的数据
         return ResultGson.ok("执行成功");
     }
 
@@ -170,10 +173,13 @@ public class CaseController {
     //组员回复消息的消息，并更改状态
     @RequestMapping("backMessage")
     @ResponseBody
-    public ResultGson backMessage(@RequestParam("jsonp") String jsonp){
+    //@RequestParam 注解，可将前端传来的参数绑定给指定后端参数，前端传的参数在下边方法的参数里接收
+    //HttpServletRequest request ，前端请求后端，就是request在启作用，request里边也可以携带数据
+    public ResultGson backMessage(@RequestParam("jsonp") String jsonp,HttpServletRequest request){
         Map<String,Object> map =  JSONObject.parseObject(jsonp,new TypeReference<Map<String, Object>>(){});
         caseService.updateCaseVersionInfo(map);
-        return ResultGson.ok("发送成功");
+        return ResultGson.ok("发送成功");  //ResultGson.ok是我自定义的返回类，ok方法会返回Json格式的数据，
+                                            // 这里只要根据需要返回数据即可
     }
 
     @RequestMapping("getCaseInfo")
