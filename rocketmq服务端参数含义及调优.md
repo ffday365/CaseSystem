@@ -2,6 +2,44 @@
 
 
 
+## waitTimeMillsInSendQueue *
+
+默认值：200
+
+含义：发送消息时，队列消息最大的等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持在600~1000
+
+
+
+## waitTimeMillsInPullQueue *
+
+默认值：5 * 1000
+
+含义：拉取消息时，队列消息最大的等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持默认，根据使用情况适当调高
+
+
+
+## waitTimeMillsInHeartbeatQueue 
+
+默认值：31 * 1000
+
+含义：心跳检测消息在队列中的最大等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持默认
+
+
+
+## waitTimeMillsInTransactionQueue 
+
+默认值：3 * 1000
+
+含义：事务消息在队列中最大的等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持默认
+
 
 
 ## accessMessageInMemorymaxRatio
@@ -84,7 +122,7 @@
 
 
 
-## cleanFileForciblyEnable
+## cleanFileForciblyEnable *
 
 默认值：true  bool
 
@@ -268,13 +306,13 @@
 
 
 
-## connectTimeoutMillis
+## connectTimeoutMillis *
 
 默认值：3000
 
 含义：表示连接超时时间，即指定连接建立的最长等待时间。当服务端在尝试连接到其他服务（如NameServer、Broker等）时，如果在设定的connectTimeoutMillis时间内未能成功建立连接，连接操作将会超时并失败。
 
-调优建议：保持默认
+调优建议：根据实际情况增加或减少。
 
 
 
@@ -586,21 +624,105 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## flushConsumerOffsetHistoryInterval *
+## flushConsumerOffsetHistoryInterval
 
-默认值：
+默认值：1000 * 60
 
-含义：
+含义：该参数控制着消费者偏移量历史记录的刷新间隔，即刷新消费者偏移量历史记录的时间间隔。这个参数的作用在于定期刷新消费者偏移量的历史记录，以便在消费者发生故障或重启后能够及时恢复到之前的偏移量位置，确保数据的一致性和可靠性。
+
+调优建议：保持默认
+
+
+
+## flushConsumerOffsetInterval
+
+默认值：1000 * 5
+
+含义：持久化消息消费进度 consumerOffse.json文件所在线程的执行频率(ms)
 
 调优建议：保持默认
 
 
 
-默认值：
+## flushDelayOffsetInterval
 
-含义：
+默认值：1000 * 10
+
+含义：延迟队列消息消费进度文件所在线程的执行频率(ms)
 
 调优建议：保持默认
+
+
+
+## flushDiskType *
+
+默认值：FlushDiskType.ASYNC_FLUSH
+
+含义：刷盘方式,默认为 ASYNC_FLUSH(异步刷盘),可选值SYNC_FLUSH(同步刷盘)
+
+调优建议：可根据项目需要来选择
+
+
+
+## flushIntervalCommitLog *
+
+默认值：500
+
+含义：该参数控制着commitlog刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
+
+调优建议：保持默认
+
+
+
+## flushIntervalConsumeQueue *
+
+默认值：1000
+
+含义：该参数控制着consumerQueue刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
+
+调优建议：保持默认
+
+
+
+## flushLeastPagesWhenWarmMapedFile 
+
+默认值：1024 / 4 * 16
+
+含义：文件预热时，至少需要加载的文件页数
+
+调优建议：保持默认
+
+
+
+## osPageCacheBusyTimeOutMills *
+
+默认值：1000
+
+含义：判断os是否发生PageCache繁忙的超时时间
+
+调优建议：不建议更改，保持默认
+
+
+
+## transientStorePoolEnable *
+
+默认值：false
+
+含义：是否开启异步刷盘模式下的内存读写分离机制。
+
+调优建议：根据业务使用情况来决定是否开启，在异步刷盘模式下，开启后可提高集群性能，但在broker进程异常退出时，可能会造成部分数据丢失。
+
+
+
+## transientStorePoolSize *
+
+默认值：5
+
+含义：在开启transientStorePoolEnable模式时，分配线程池的大小。如果分配数量较小，可能会触发system busy异常。
+
+调优建议：保持默认
+
+
 
 
 
