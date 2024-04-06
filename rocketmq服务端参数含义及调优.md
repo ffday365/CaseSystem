@@ -2,7 +2,11 @@
 
 
 
-## waitTimeMillsInSendQueue *
+## 可配置参数
+
+
+
+### waitTimeMillsInSendQueue *
 
 默认值：200
 
@@ -12,7 +16,7 @@
 
 
 
-## waitTimeMillsInPullQueue *
+### waitTimeMillsInPullQueue *
 
 默认值：5 * 1000
 
@@ -22,49 +26,9 @@
 
 
 
-## waitTimeMillsInHeartbeatQueue 
+### autoCreateSubscriptionGroup
 
-默认值：31 * 1000
-
-含义：心跳检测消息在队列中的最大等待时间，过低时可能触发broker busy异常。
-
-调优建议：保持默认
-
-
-
-## waitTimeMillsInTransactionQueue 
-
-默认值：3 * 1000
-
-含义：事务消息在队列中最大的等待时间，过低时可能触发broker busy异常。
-
-调优建议：保持默认
-
-
-
-## accessMessageInMemorymaxRatio
-
-默认值：40 int
-
-含义：当Master Broker发现Consumer的消费位点与CommitLog的最新值的差值的容量超过该机器内存的百分比，会推荐Consumer从Slave Broker中去读取数据，降低Master Broker的IO。
-
-调优建议：保持默认值。
-
-
-
-## adminBrokerThreadPoolNums
-
-默认值：16 int
-
-含义：服务端处理admin工具的线程数量
-
-调优建议：保持默认值。
-
-
-
-## autoCreateSubscriptionGroup
-
-默认值：true bool
+默认值：true
 
 含义：服务端是否开放自动创建消费者组
 
@@ -72,9 +36,9 @@
 
 
 
-## autoCreateTopicEnable
+### autoCreateTopicEnable
 
-默认值：true bool
+默认值：true
 
 含义：服务端是否开放自动创建topic
 
@@ -82,49 +46,63 @@
 
 
 
-## bitMapLengthConsumeQueueExt
+### defaultQueryMaxNum *
 
-默认值：64 int
+默认值：32
 
-含义：ConsumeQueue扩展过滤bitmap大小
+含义：消费者消费消息时，一批次从服务端获取消息的最大值
 
-调优建议：保持默认
-
-
-
-## brokerFastFailureEnable
-
-默认值：true bool
-
-含义：broker端是否开启快速失败。开启开选项，可在服务端异常时，快速将失败信息返回给客户端，建议开启。
-
-调优建议：保持默认
+调优建议：根据业务形态调整
 
 
 
-## brokerPermission
+### defaultTopicQueueNums
 
-默认值：6  int
+默认值：8
 
-含义：broker端的访问权限，6表示可读可写 4表示只读 2表示只写 。在运维节点时可控制节点流量。
+含义：创建topic未指定队列数量时，默认会创建的数量
 
 调优建议：保持默认
 
 
 
-## checkCRCOnRecover
+### deleteWhen *
 
-默认值：true  bool
+默认值：04
 
-含义：是否在文件恢复时开启crc校验，保持开启即可，防止文件被篡改。
+含义：磁盘文件空间充足情况下，默认每天什么时候执行删除过期文件，默认04表示凌晨4点
 
 调优建议：保持默认
 
 
 
-## cleanFileForciblyEnable *
+### fileReservedTime *
 
-默认值：true  bool
+默认值：72
+
+含义：文件保留时间，默认72小时，表示非当前写文件最后一次更新时间加上filereservedtime小与当前时间，该文件将被清理。需要注意的是，这个时间不是一个绝对时间，文件删除还需要配合其他参数使用。
+
+调优建议：保持默认
+
+
+
+### flushDiskType *
+
+默认值：FlushDiskType.ASYNC_FLUSH
+
+含义：刷盘方式,默认为 ASYNC_FLUSH(异步刷盘),可选值SYNC_FLUSH(同步刷盘)
+
+调优建议：异步刷盘可满足大部分场景，对数据可靠性要求较高同时性能要求不高时，可使用同步刷盘。
+
+
+
+## 文件管理
+
+
+
+### cleanFileForciblyEnable *
+
+默认值：true
 
 含义：是否开启强制删除过期的存储文件。这项参数关联过期文件的删除，在服务端每日定时清除后，文件占用磁盘空间仍然无法释放(diskSpaceWarningLevelRatio 0.9)，此时可能触发文件的强制删除，即便集群中的消息还没有过期。
 
@@ -134,9 +112,9 @@
 
 
 
-## cleanResourceInterval
+### cleanResourceInterval
 
-默认值：10000 int
+默认值：10000
 
 含义：服务端清理过期文件的线程调用频率
 
@@ -146,127 +124,55 @@
 
 
 
-## clientAsyncSemaphoreValue
-
-默认值：65535 int
-
-含义：服务端对客户端异步请求数量的最大阈值。消息异步发送是指消息生产者调用发送的 API 后，无须阻塞等待消息服务器返回本次消息发送结果，只需要提供一个回调函数，供消息发送客户端在收到响应结果回调 。 异步方式相比同步方式，消息发送端的发送性能会显著提高，但为了保护消息服务器的负载压力，RocketMQ 对消息 发送的异步消息进行了井发控制，通 过参数 clientAsyncSemaphoreValue来控制，默认为 65535 。 异步消息发送虽然也可以通过DefaultMQProducer#retryTimesWhenSendAsyncFailed 属性来控制消息重试次数，但是重试的调用入口 是在 收到服务端 响应包时进行的，如果出现网络异常、网络超时等将不会重试 。
-
-调优建议：根据实际请求TPS增加
-
-
-
-## clientCallbackExecutorThreads
-
-默认值：Runtime.getRuntime().availableProcessors()
-
-含义：客户端回调线程数。该线程数等于 Netty 通信层回调线程的个数。默认值为 Runtime.getRuntime().availableProcessors()，表示当前有效的CPU个数
-
-调优建议：保持默认
-
-
-
-## clientChannelMaxIdleTimeSeconds
+### destroyMapedFileIntervalForcibly
 
 默认值：120
 
-含义：客户端每个channel最大等待时间
+含义：销毁MappedFile被拒绝的最大存活时间，默认120s。清除过期文件线程在初次销毁mappedfile时，如果该文件被其他线程引用，引用次数大于0.则设置MappedFile的可用状态为false，并设置第一次删除时间，下一次清理任务到达时，如果系统时间大于初次删除时间加上本参数，则将ref次数一次减1000，直到引用次数小于0，则释放物理资源
 
 调优建议：保持默认
 
 
 
-## clientCloseSocketIfTimeout
+### diskMaxUsedSpaceRatio *
 
-默认值：true
+默认值：75
 
-含义：客户端关闭socket是否需要等待
+含义：commitlog目录所在分区的最大使用比例，如果commitlog目录所在的分区使用比例大于该值，则触发过期文件删除
 
-调优建议：保持默认
-
-
-
-## clientManagerThreadPoolQueueCapacity
-
-默认值：1000000
-
-含义：客户端管理线程池任务队列初始大小
+```
+physic disk maybe full soon, so reclaim space, 
+```
 
 调优建议：保持默认
 
 
 
-## clientManageThreadPoolNums
+### deleteCommitLogFilesInterval
 
-默认值：32
+默认值：100
 
-含义：服务端处理客户端管理（心跳 注册 取消注册线程数量
-
-调优建议：保持默认
-
-
-
-## clientOnewaySemaphoreValue
-
-默认值：65535
-
-含义：客户端对invokeOnewayImpl方法的调用控制
+含义：删除commitlog文件的时间间隔，删除一个文件后等一下再删除一个文件
 
 调优建议：保持默认
 
 
 
-## clientPooledByteBufAllocatorEnable
+### deleteConsumeQueueFilesInterval
 
-默认值：false
+默认值：100
 
-含义：客户端池化内存是否开启
-
-调优建议：保持默认
-
-
-
-## clientSocketRcvBufSize
-
-默认值：0
-
-含义：客户端socket接收缓冲区大小
+含义：删除consumequeue文件时间间隔
 
 调优建议：保持默认
 
 
 
-## clientSocketSndBufSize
-
-默认值：0
-
-含义：客户端socket发送缓冲区大小
-
-调优建议：保持默认
+## 消息落盘
 
 
 
-## clientWorkerThreads
-
-默认值：4
-
-含义：worker线程数
-
-调优建议：保持默认
-
-
-
-## clusterTopicEnable
-
-默认值：true
-
-含义：集群名称是否可用在主题使用，开启后开放集群同名topic读写权限。
-
-调优建议：保持默认
-
-
-
-## commitCommitLogLeastPages *
+### commitCommitLogLeastPages *
 
 默认值：4
 
@@ -276,7 +182,7 @@
 
 
 
-## commitCommitLogThoroughInterval *
+### commitCommitLogThoroughInterval *
 
 默认值：200
 
@@ -286,7 +192,7 @@
 
 
 
-## commitIntervalCommitLog *
+### commitIntervalCommitLog *
 
 默认值：200
 
@@ -296,7 +202,341 @@
 
 
 
-## compressedRegister
+### flushCommitLogLeastPages *
+
+默认值：4
+
+含义：一次刷盘至少需要脏页的数量，针对commitlog文件。
+
+调优建议：保持默认
+
+
+
+### flushCommitLogTimed *
+
+默认值：true
+
+含义：配置提交日志（CommitLog）定时刷盘的时间间隔。设置该参数后，RocketMQ 会按照指定的时间间隔进行定时刷写操作，将内存中的提交日志刷写到磁盘，以确保数据持久化。这有助于提高数据的可靠性，并且可以减少因为突然断电等情况导致的数据丢失风险。
+
+调优建议：保持默认
+
+
+
+### flushConsumeQueueLeastPages *
+
+默认值：2
+
+含义：一次刷盘至少需要脏页的数量,默认2页,针对 Consume文件
+
+调优建议：保持默认
+
+
+
+### flushConsumeQueueThoroughInterval *
+
+默认值：1000 * 60
+
+含义：Consume两次刷盘的最大间隔,如果超过该间隔,将忽略
+
+调优建议：保持默认
+
+
+
+### flushConsumerOffsetHistoryInterval
+
+默认值：1000 * 60
+
+含义：该参数控制着消费者偏移量历史记录的刷新间隔，即刷新消费者偏移量历史记录的时间间隔。这个参数的作用在于定期刷新消费者偏移量的历史记录，以便在消费者发生故障或重启后能够及时恢复到之前的偏移量位置，确保数据的一致性和可靠性。
+
+调优建议：保持默认
+
+
+
+### flushConsumerOffsetInterval
+
+默认值：1000 * 5
+
+含义：持久化消息消费进度 consumerOffse.json文件所在线程的执行频率(ms)
+
+调优建议：保持默认
+
+
+
+### flushDelayOffsetInterval
+
+默认值：1000 * 10
+
+含义：延迟队列消息消费进度文件所在线程的执行频率(ms)
+
+调优建议：保持默认
+
+
+
+### flushIntervalCommitLog *
+
+默认值：500
+
+含义：该参数控制着commitlog刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
+
+调优建议：保持默认
+
+
+
+### flushIntervalConsumeQueue *
+
+默认值：1000
+
+含义：该参数控制着consumerQueue刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
+
+调优建议：保持默认
+
+
+
+### flushLeastPagesWhenWarmMapedFile 
+
+默认值：1024 / 4 * 16
+
+含义：文件预热时，至少需要加载的文件页数
+
+调优建议：保持默认
+
+
+
+## 常规参数
+
+
+
+### osPageCacheBusyTimeOutMills *
+
+默认值：1000
+
+含义：判断os是否发生PageCache繁忙的超时时间
+
+调优建议：不建议更改，保持默认
+
+
+
+### transientStorePoolEnable *
+
+默认值：false
+
+含义：是否开启异步刷盘模式下的内存读写分离机制。
+
+调优建议：根据业务使用情况来决定是否开启，在异步刷盘模式下，开启后可提高集群性能，但在broker进程异常退出时，可能会造成部分数据丢失。
+
+
+
+### transientStorePoolSize *
+
+默认值：5
+
+含义：在开启transientStorePoolEnable模式时，分配线程池的大小。如果分配数量较小，可能会触发system busy异常。
+
+调优建议：保持默认
+
+
+
+### accessMessageInMemorymaxRatio
+
+默认值：40 int
+
+含义：当Master Broker发现Consumer的消费位点与CommitLog的最新值的差值的容量超过该机器内存的百分比，会推荐Consumer从Slave Broker中去读取数据，降低Master Broker的IO。
+
+调优建议：保持默认值。
+
+
+
+### brokerFastFailureEnable
+
+默认值：true
+
+含义：broker端是否开启快速失败。开启开选项，可在服务端异常时，快速将失败信息返回给客户端，建议开启。
+
+调优建议：保持默认
+
+
+
+### waitTimeMillsInHeartbeatQueue 
+
+默认值：31 * 1000
+
+含义：心跳检测消息在队列中的最大等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持默认
+
+
+
+### waitTimeMillsInTransactionQueue 
+
+默认值：3 * 1000
+
+含义：事务消息在队列中最大的等待时间，过低时可能触发broker busy异常。
+
+调优建议：保持默认
+
+
+
+### adminBrokerThreadPoolNums
+
+默认值：16 int
+
+含义：服务端处理admin工具的线程数量
+
+调优建议：保持默认值。
+
+
+
+### bitMapLengthConsumeQueueExt
+
+默认值：64 int
+
+含义：ConsumeQueue扩展过滤bitmap大小
+
+调优建议：保持默认
+
+
+
+### brokerPermission
+
+默认值：6  int
+
+含义：broker端的访问权限，6表示可读可写 4表示只读 2表示只写 。在运维节点时可控制节点流量。
+
+调优建议：保持默认
+
+
+
+### checkCRCOnRecover
+
+默认值：true  bool
+
+含义：是否在文件恢复时开启crc校验，保持开启即可，防止文件被篡改。
+
+调优建议：保持默认
+
+
+
+### clientAsyncSemaphoreValue
+
+默认值：65535 int
+
+含义：服务端对客户端异步请求数量的最大阈值。消息异步发送是指消息生产者调用发送的 API 后，无须阻塞等待消息服务器返回本次消息发送结果，只需要提供一个回调函数，供消息发送客户端在收到响应结果回调 。 异步方式相比同步方式，消息发送端的发送性能会显著提高，但为了保护消息服务器的负载压力，RocketMQ 对消息 发送的异步消息进行了井发控制，通 过参数 clientAsyncSemaphoreValue来控制，默认为 65535 。 异步消息发送虽然也可以通过DefaultMQProducer#retryTimesWhenSendAsyncFailed 属性来控制消息重试次数，但是重试的调用入口 是在 收到服务端 响应包时进行的，如果出现网络异常、网络超时等将不会重试 。
+
+调优建议：根据实际请求TPS增加
+
+
+
+### clientCallbackExecutorThreads
+
+默认值：Runtime.getRuntime().availableProcessors()
+
+含义：客户端回调线程数。该线程数等于 Netty 通信层回调线程的个数。默认值为 Runtime.getRuntime().availableProcessors()，表示当前有效的CPU个数
+
+调优建议：保持默认
+
+
+
+### clientChannelMaxIdleTimeSeconds
+
+默认值：120
+
+含义：客户端每个channel最大等待时间
+
+调优建议：保持默认
+
+
+
+### clientCloseSocketIfTimeout
+
+默认值：true
+
+含义：客户端关闭socket是否需要等待
+
+调优建议：保持默认
+
+
+
+### clientManagerThreadPoolQueueCapacity
+
+默认值：1000000
+
+含义：客户端管理线程池任务队列初始大小
+
+调优建议：保持默认
+
+
+
+### clientManageThreadPoolNums
+
+默认值：32
+
+含义：服务端处理客户端管理（心跳 注册 取消注册线程数量
+
+调优建议：保持默认
+
+
+
+### clientOnewaySemaphoreValue
+
+默认值：65535
+
+含义：客户端对invokeOnewayImpl方法的调用控制
+
+调优建议：保持默认
+
+
+
+### clientPooledByteBufAllocatorEnable
+
+默认值：false
+
+含义：客户端池化内存是否开启
+
+调优建议：保持默认
+
+
+
+### clientSocketRcvBufSize
+
+默认值：0
+
+含义：客户端socket接收缓冲区大小
+
+调优建议：保持默认
+
+
+
+### clientSocketSndBufSize
+
+默认值：0
+
+含义：客户端socket发送缓冲区大小
+
+调优建议：保持默认
+
+
+
+### clientWorkerThreads
+
+默认值：4
+
+含义：worker线程数
+
+调优建议：保持默认
+
+
+
+### clusterTopicEnable
+
+默认值：true
+
+含义：集群名称是否可用在主题使用，开启后开放集群同名topic读写权限。
+
+调优建议：保持默认
+
+
+
+### compressedRegister
 
 默认值：false
 
@@ -306,7 +546,7 @@
 
 
 
-## connectTimeoutMillis *
+### connectTimeoutMillis *
 
 默认值：3000
 
@@ -316,7 +556,7 @@
 
 
 
-## consumerFallbehindThreshold
+### consumerFallbehindThreshold
 
 默认值：1024L * 1024 * 1024 * 16
 
@@ -330,7 +570,7 @@
 
 
 
-## disableConsumeIfConsumerReadSlowly
+### disableConsumeIfConsumerReadSlowly
 
 默认值：false
 
@@ -340,7 +580,7 @@
 
 
 
-## consumerManagerThreadPoolQueueCapacity
+### consumerManagerThreadPoolQueueCapacity
 
 默认值：1000000
 
@@ -350,7 +590,7 @@
 
 
 
-## consumerManageThreadPoolNums
+### consumerManageThreadPoolNums
 
 默认值：32
 
@@ -360,7 +600,7 @@
 
 
 
-## debugLockEnable
+### debugLockEnable
 
 默认值：false
 
@@ -370,67 +610,7 @@
 
 
 
-## defaultQueryMaxNum *
-
-默认值：32
-
-含义：消费者消费消息时，一批次从服务端获取消息的最大值
-
-调优建议：根据业务形态调整
-
-
-
-## defaultTopicQueueNums
-
-默认值：8
-
-含义：创建topic未指定队列数量时，默认会创建的数量
-
-调优建议：保持默认
-
-
-
-## deleteCommitLogFilesInterval
-
-默认值：100
-
-含义：删除commitlog文件的时间间隔，删除一个文件后等一下再删除一个文件
-
-调优建议：保持默认
-
-
-
-## deleteConsumeQueueFilesInterval
-
-默认值：100
-
-含义：删除consumequeue文件时间间隔
-
-调优建议：保持默认
-
-
-
-## deleteWhen *
-
-默认值：04
-
-含义：磁盘文件空间充足情况下，默认每天什么时候执行删除过期文件，默认04表示凌晨4点
-
-调优建议：保持默认
-
-
-
-## destroyMapedFileIntervalForcibly
-
-默认值：120
-
-含义：销毁MappedFile被拒绝的最大存活时间，默认120s。清除过期文件线程在初次销毁mappedfile时，如果该文件被其他线程引用，引用次数大于0.则设置MappedFile的可用状态为false，并设置第一次删除时间，下一次清理任务到达时，如果系统时间大于初次删除时间加上本参数，则将ref次数一次减1000，直到引用次数小于0，则释放物理资源
-
-调优建议：保持默认
-
-
-
-## diskFallRecorded
+### diskFallRecorded
 
 默认值：true
 
@@ -440,21 +620,7 @@
 
 
 
-## diskMaxUsedSpaceRatio *
-
-默认值：75
-
-含义：commitlog目录所在分区的最大使用比例，如果commitlog目录所在的分区使用比例大于该值，则触发过期文件删除
-
-```
-physic disk maybe full soon, so reclaim space, 
-```
-
-调优建议：放开配置，保持默认
-
-
-
-## duplicationEnable
+### duplicationEnable
 
 默认值：false
 
@@ -464,7 +630,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## enableCalcFilterBitMap
+### enableCalcFilterBitMap
 
 默认值：false
 
@@ -474,7 +640,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## enableConsumeQueueExt
+### enableConsumeQueueExt
 
 默认值：false
 
@@ -484,7 +650,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## enablePropertyFilter
+### enablePropertyFilter
 
 默认值：false
 
@@ -494,7 +660,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## endTransactionPoolQueueCapacity
+### endTransactionPoolQueueCapacity
 
 默认值：100000
 
@@ -504,7 +670,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## endTransactionThreadPoolNums
+### endTransactionThreadPoolNums
 
 默认值：Math.max(8 + Runtime.getRuntime().availableProcessors() * 2, sendMessageThreadPoolNums * 4);
 
@@ -514,7 +680,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## expectConsumerNumUseFilter
+### expectConsumerNumUseFilter
 
 默认值：32
 
@@ -524,7 +690,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## fastFailIfNoBufferInStorePool
+### fastFailIfNoBufferInStorePool
 
 默认值：false
 
@@ -534,7 +700,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## fetchNamesrvAddrByAddressServer
+### fetchNamesrvAddrByAddressServer
 
 默认值：false
 
@@ -544,17 +710,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## fileReservedTime *
-
-默认值：72
-
-含义：文件保留时间，默认72小时，表示非当前写文件最后一次更新时间加上filereservedtime小与当前时间，该文件将被清理。需要注意的是，这个时间不是一个绝对时间，文件删除还需要配合其他参数使用。
-
-调优建议：保持默认
-
-
-
-## filterDataCleanTimeSpan
+### filterDataCleanTimeSpan
 
 默认值：24 * 3600 * 1000;
 
@@ -564,7 +720,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## filterServerNums
+### filterServerNums
 
 默认值：0
 
@@ -574,7 +730,7 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## filterSupportRetry
+### filterSupportRetry
 
 默认值：false
 
@@ -584,143 +740,78 @@ physic disk maybe full soon, so reclaim space,
 
 
 
-## flushCommitLogLeastPages *
+## 服务端与客户端通信
 
-默认值：4
 
-含义：一次刷盘至少需要脏页的数量，针对commitlog文件。
 
-调优建议：保持默认
+### 通信code
 
+文件地址：org/apache/rocketmq/common/protocol/RequestCode.java
 
+```java
+public static final int SEND_MESSAGE = 10;
 
-## flushCommitLogTimed *
+public static final int PULL_MESSAGE = 11;
 
-默认值：true
+public static final int QUERY_MESSAGE = 12;
 
-含义：配置提交日志（CommitLog）定时刷盘的时间间隔。设置该参数后，RocketMQ 会按照指定的时间间隔进行定时刷写操作，将内存中的提交日志刷写到磁盘，以确保数据持久化。这有助于提高数据的可靠性，并且可以减少因为突然断电等情况导致的数据丢失风险。
+...
+```
 
-调优建议：保持默认
 
 
+### 请求池大小
 
-## flushConsumeQueueLeastPages *
+```java
+sendThreadPoolQueueCapacity = 10000;
+putThreadPoolQueueCapacity = 10000;
+pullThreadPoolQueueCapacity = 100000;
+replyThreadPoolQueueCapacity = 10000;
+queryThreadPoolQueueCapacity = 20000;
+clientManagerThreadPoolQueueCapacity = 1000000;
+consumerManagerThreadPoolQueueCapacity = 1000000;
+heartbeatThreadPoolQueueCapacity = 50000;
+endTransactionPoolQueueCapacity = 100000;
+```
 
-默认值：2
 
-含义：一次刷盘至少需要脏页的数量,默认2页,针对 Consume文件
 
-调优建议：保持默认
+### 命令处理线程池大小
 
+```java
+// 消息发送线程池大小，集群设置为顺序集群时，会被设置为1
+sendMessageThreadPoolNums = Math.min(Runtime.getRuntime().availableProcessors(), 4);
 
+//生产者发送消息时的异步响应操作
+putMessageFutureThreadPoolNums = Math.min(Runtime.getRuntime().availableProcessors(), 4);
 
-## flushConsumeQueueThoroughInterval *
+//消息拉取
+pullMessageThreadPoolNums = 16 + Runtime.getRuntime().availableProcessors() * 2;
 
-默认值：1000 * 60
+//处理消费者发送的消息消费结果
+processReplyMessageThreadPoolNums = 16 + Runtime.getRuntime().availableProcessors() * 2;
 
-含义：Consume两次刷盘的最大间隔,如果超过该间隔,将忽略
+//消息查询
+queryMessageThreadPoolNums = 8 + Runtime.getRuntime().availableProcessors();
 
-调优建议：保持默认
+//admin操作管理
+adminBrokerThreadPoolNums = 16;
 
+//客户端管理
+clientManageThreadPoolNums = 32;
 
+//消费者管理
+consumerManageThreadPoolNums = 32;
 
-## flushConsumerOffsetHistoryInterval
+//心跳管理
+heartbeatThreadPoolNums = Math.min(32, Runtime.getRuntime().availableProcessors());
+```
 
-默认值：1000 * 60
 
-含义：该参数控制着消费者偏移量历史记录的刷新间隔，即刷新消费者偏移量历史记录的时间间隔。这个参数的作用在于定期刷新消费者偏移量的历史记录，以便在消费者发生故障或重启后能够及时恢复到之前的偏移量位置，确保数据的一致性和可靠性。
 
-调优建议：保持默认
 
 
-
-## flushConsumerOffsetInterval
-
-默认值：1000 * 5
-
-含义：持久化消息消费进度 consumerOffse.json文件所在线程的执行频率(ms)
-
-调优建议：保持默认
-
-
-
-## flushDelayOffsetInterval
-
-默认值：1000 * 10
-
-含义：延迟队列消息消费进度文件所在线程的执行频率(ms)
-
-调优建议：保持默认
-
-
-
-## flushDiskType *
-
-默认值：FlushDiskType.ASYNC_FLUSH
-
-含义：刷盘方式,默认为 ASYNC_FLUSH(异步刷盘),可选值SYNC_FLUSH(同步刷盘)
-
-调优建议：可根据项目需要来选择
-
-
-
-## flushIntervalCommitLog *
-
-默认值：500
-
-含义：该参数控制着commitlog刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
-
-调优建议：保持默认
-
-
-
-## flushIntervalConsumeQueue *
-
-默认值：1000
-
-含义：该参数控制着consumerQueue刷盘线程的休眠时间，通过调整该参数的大小，可以改变刷盘的频率。
-
-调优建议：保持默认
-
-
-
-## flushLeastPagesWhenWarmMapedFile 
-
-默认值：1024 / 4 * 16
-
-含义：文件预热时，至少需要加载的文件页数
-
-调优建议：保持默认
-
-
-
-## osPageCacheBusyTimeOutMills *
-
-默认值：1000
-
-含义：判断os是否发生PageCache繁忙的超时时间
-
-调优建议：不建议更改，保持默认
-
-
-
-## transientStorePoolEnable *
-
-默认值：false
-
-含义：是否开启异步刷盘模式下的内存读写分离机制。
-
-调优建议：根据业务使用情况来决定是否开启，在异步刷盘模式下，开启后可提高集群性能，但在broker进程异常退出时，可能会造成部分数据丢失。
-
-
-
-## transientStorePoolSize *
-
-默认值：5
-
-含义：在开启transientStorePoolEnable模式时，分配线程池的大小。如果分配数量较小，可能会触发system busy异常。
-
-调优建议：保持默认
+## 调优场景
 
 
 
